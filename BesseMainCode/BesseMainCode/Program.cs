@@ -7,7 +7,7 @@ using CTRE.Phoenix.Controller;
 using CTRE.Phoenix.MotorControl;
 using CTRE.Phoenix.MotorControl.CAN;
 
-namespace HERO_Serial_Example
+namespace BesseMainCode
 {
     /*
      * Channel Ranges:
