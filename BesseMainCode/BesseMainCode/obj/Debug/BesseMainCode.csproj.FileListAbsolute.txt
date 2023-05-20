@@ -1,0 +1,19 @@
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\le\HERO Serial Example.exe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\be\HERO Serial Example.exe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\le\HERO Serial Example.pdb
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\be\HERO Serial Example.pdb
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\HERO Serial Example.exe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\HERO Serial Example.pdb
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\le\HERO Serial Example.pe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\le\HERO Serial Example.pdbx
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\be\HERO Serial Example.pe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\bin\Debug\be\HERO Serial Example.pdbx
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\BesseMainCode.csproj.CoreCompileInputs.cache
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\be\HERO Serial Example.pe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\be\HERO Serial Example.pdbx
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\le\HERO Serial Example.pe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\le\HERO Serial Example.pdbx
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\HERO Serial Example.exe
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\HERO Serial Example.pdb
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\BesseMainCode.csproj.AssemblyReference.cache
+C:\Users\adi04\source\repos\BesseMainCode\BesseMainCode\obj\Debug\TinyCLR_DebugReferences.cache
