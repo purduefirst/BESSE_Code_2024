@@ -12,8 +12,8 @@ namespace BesseMainCode
     /*
      * Channel Ranges:
      *      1 (Right Joystick y-value): 1811 - 172
-     *      2 (Right Joystick x-value): 1804 - 172
-     *      3 (Left Joystick y-value): 1788 - 172
+     *      2 (Right Joystick x-value): 1811 - 172
+     *      3 (Left Joystick y-value): 1811 - 172 (left joystick values were being funky might be a physical issue with it)
      *      4 (Left Joystick x-value): 1811 - 172
      *      5 (Top Right Switch - 3 states):
      *                                    - 999 (top)
@@ -45,8 +45,11 @@ namespace BesseMainCode
         static byte b = 0;
         static byte errors = 0;
         static int count = 1;
+        static double currentLeft = 0;
+        static double currentRight = 0;
 
         static bool failsafe = false;
+        static bool stop = false;
 
         public static void Main() {
             _uart.Open();
@@ -60,18 +63,14 @@ namespace BesseMainCode
 
                 //if (_uart.BytesToRead > 0) { //need to see later could break shit
                     // decode the singal from the receiver
-                    Test();
                     Decode();
 
-                    
-                    //ArcadeDrive(((((double)(int)_channels.GetValue(3) - 172) / (1788 - 172)) * (1 - -1) + -1),
-                    //((((double)(int)_channels.GetValue(2) - 172) / (1804 - 172)) * (1 - -1) + -1));
-
-                    
+                    //Test();
                 //}
             }
         }
         
+        //this method needs to be called within decode(), breaks if called in the main method
         static void ArcadeDrive(double rotate, double drive) {
             // creates deadzones
             if (System.Math.Abs(rotate) < 0.07)
@@ -98,10 +97,6 @@ namespace BesseMainCode
             double maximum = System.Math.Max(System.Math.Abs(rotate), System.Math.Abs(drive));
             double total = drive + rotate;
             double difference = drive - rotate;
-
-
-            //Debug.Print("Rotate: " + rotate);
-            //Debug.Print("Drive: " + drive);
 
             if(System.Math.Abs(drive) < 1.00 || System.Math.Abs(drive) < 1.00) {
                 if (drive >= 0)
@@ -153,6 +148,7 @@ namespace BesseMainCode
             }
         }
 
+        //this method needs to be called within decode(), breaks if called in the main method
         static void TankDrive(double left, double right) {
             // creates deadzones
             if (System.Math.Abs(left) < 0.07) {
@@ -162,16 +158,40 @@ namespace BesseMainCode
             if (System.Math.Abs(right) < 0.07) {
                 right = 0;
             }
+            
+            if(System.Math.Abs(left - currentLeft) < 0.16)
+            {
+                currentLeft = left;
+            } else
+            {
+                left = currentLeft;
+            }
 
-            if (System.Math.Abs(left) > 0.4) { 
-                left = 0.4;
+            if (System.Math.Abs(right - currentRight) < 0.25)
+            {
+                currentRight = right;
+            }
+            else
+            {
+                right = currentRight;
+            }
+
+            Debug.Print("Current Left: " + currentLeft);
+            Debug.Print("New Left: " + left);
+
+
+
+            /*if (System.Math.Abs(left) > 0.07) { 
+                left = 0;
             }   
        
 
-            if (System.Math.Abs(right) > 0.4) {
-                right = 0.4;
-            }
+            if (System.Math.Abs(right) > 0.07) {
+                right = 0;
+            }*/
 
+
+            
             leftLeader.Set(ControlMode.PercentOutput, left);
             leftFollower1.Set(ControlMode.PercentOutput, left);
             leftFollower2.Set(ControlMode.PercentOutput, left);
@@ -179,6 +199,7 @@ namespace BesseMainCode
             rightLeader.Set(ControlMode.PercentOutput, -right);
             rightFollower1.Set(ControlMode.PercentOutput, -right);
             rightFollower2.Set(ControlMode.PercentOutput, -right);
+            
         }
 
         static void RunFakeWheels() {
@@ -194,6 +215,18 @@ namespace BesseMainCode
             } else {
                 leftMotor.Set(ControlMode.PercentOutput, 0);
                 rightMotor.Set(ControlMode.PercentOutput, 0);
+            }
+        }
+
+        static void KillSwitch()
+        {
+            if ((int)_channels.GetValue(6) == 992)
+            {
+                stop = false;
+            }
+            else
+            {
+                stop = true;
             }
         }
 
@@ -214,8 +247,8 @@ namespace BesseMainCode
             //rightFollower1.Set(ControlMode.PercentOutput, 0.1);
             //rightFollower2.Set(ControlMode.PercentOutput, 0.1);
 
-            //leftMotor.Set(ControlMode.PercentOutput, 0.8);
-            //rightMotor.Set(ControlMode.PercentOutput, 0.8);
+            leftMotor.Set(ControlMode.PercentOutput, 0.8);
+            rightMotor.Set(ControlMode.PercentOutput, 0.8);
         }
 
         // sets the motors to the states defined below
@@ -287,66 +320,75 @@ namespace BesseMainCode
 
                 //if (count % 20 == 0)
                 //{
-                    //    //Debug.Print("Channel: Cha1 Cha2 Cha3 Cha4 Cha5 Cha6 Cha7 Cha8 Cha9 Cha10");
-                    //    //Debug.Print("         " + _channels[1].ToString("D8") + "         " + _channels[1].ToString("D8") + " ");
 
+                    //RAW CHANNEL INPUT
                     //Debug.Print("RIGHT STICK (UP-DOWN):" + _channels.GetValue(1).ToString());
                     //Debug.Print("RIGHT STICK (LEFT-RIGHT):" + _channels.GetValue(2).ToString());
                     //Debug.Print("LEFT STICK (UP-DOWN):" + _channels.GetValue(3).ToString());
                     //Debug.Print("LEFT STICK (LEFT-RIGHT):" + _channels.GetValue(4).ToString());
                     //Debug.Print("Wheel Switch:" + _channels.GetValue(5).ToString());
+                    //Debug.Print("Kill Switch:" + _channels.GetValue(6).ToString());
 
-                    Debug.Print("RIGHT STICK (UP-DOWN):" + ((((double)(int)_channels.GetValue(1) - 172) / (1811 - 172)) * (1 - -1) + -1));
-                    //Debug.Print("RIGHT STICK (LEFT-RIGHT):" + ((((double)(int)_channels.GetValue(2) - 172) / (1815 - 165)) * (1 - -1) + -1));
-                    //Debug.Print("LEFT STICK (UP-DOWN):" + ((((double)(int)_channels.GetValue(3) - 172) / (1800 - 165)) * (1 - -1) + -1));
-                    //Debug.Print("LEFT STICK (LEFT-RIGHT):" + ((((double)(int)_channels.GetValue(4) - 172) / (1811 - 172)) * (1 - -1) + -1));
-                    //    if ((int)_channels.GetValue(5) == 999)
-                    //    {
-                    //        Debug.Print("Wheel Switch: Run Wheels Forward");
-                    //    }
-                    //    else if ((int)_channels.GetValue(5) == 992)
-                    //    {
-                    //        Debug.Print("Wheel Switch: Stop Wheels");
-                    //    }
-                    //    else if ((int)_channels.GetValue(5) == 984)
-                    //    {
-                    //        Debug.Print("Wheel Switch: Run Wheels Backward");
-                    //    }
-                    //    else
-                    //    {
-                    //        Debug.Print("Wheel Switch: Stop Wheels");
-                    //    }
+                //CONVERTED CHANNEL INPUT
+                //Debug.Print("RIGHT STICK (UP-DOWN):" + ((((double)(int)_channels.GetValue(1) - 172) / (1811 - 172)) * (1 - -1) + -1));
+                //Debug.Print("RIGHT STICK (LEFT-RIGHT):" + ((((double)(int)_channels.GetValue(2) - 172) / (1815 - 165)) * (1 - -1) + -1));
+                //Debug.Print("LEFT STICK (UP-DOWN):" + ((((double)(int)_channels.GetValue(3) - 172) / (1820 - 165)) * (1 - -1) + -1));
+                //Debug.Print("LEFT STICK (LEFT-RIGHT):" + ((((double)(int)_channels.GetValue(4) - 172) / (1811 - 172)) * (1 - -1) + -1));
+                //    if ((int)_channels.GetValue(5) == 999)
+                //    {
+                //        Debug.Print("Wheel Switch: Run Wheels Forward");
+                //    }
+                //    else if ((int)_channels.GetValue(5) == 992)
+                //    {
+                //        Debug.Print("Wheel Switch: Stop Wheels");
+                //    }
+                //    else if ((int)_channels.GetValue(5) == 984)
+                //    {
+                //        Debug.Print("Wheel Switch: Run Wheels Backward");
+                //    }
+                //    else
+                //    {
+                //        Debug.Print("Wheel Switch: Stop Wheels");
+                //    }
 
-                    //    Debug.Print("Channel 6:" + _channels[6]);
-                    //    Debug.Print("Channel 7:" + _channels[7]);
-                    //    Debug.Print("Channel 8:" + _channels[8]);
-                    //    Debug.Print("Channel 9:" + _channels[9]);
-                    //    Debug.Print("Channel 10:" + _channels[10]);
-                    //    Debug.Print("Channel 11:" + _channels[11]);
-                    //    Debug.Print("Channel 12:" + _channels[12]);
-                    //    Debug.Print("Channel 13:" + _channels[13]);
-                    //    Debug.Print("Channel 14:" + _channels[14]);
-                    //    Debug.Print("Channel 15:" + _channels[15]);
-                    //    Debug.Print("Channel 16:" + _channels[16]);
-                    //    Debug.Print("Channel 17:" + _channels[17]);
-                    //    Debug.Print("Channel 18:" + _channels[18]);
-                       Debug.Print("failsafe: " + failsafe);
+                //FAILSAFE
+                Debug.Print("failsafe: " + failsafe);
 
-                    //count = 1;
+                //count = 1;
                 //}
                 //count++;
 
+                KillSwitch();
+                //Debug.Print("STOP BOOLEAN: " + stop);
                 // Use the left joystick (y-value) for moving the robot forward or backwards and the right joystic (x-value) for turning robot left or right
                 // Inputs below are being converted form their channel ranges to the input range of -1 to 1 using the following equation:
                 // ((Input - Old Min)/(Old Max - Old Min)) * (New Max - New Min) + New Min
                 //ArcadeDrive(((((double)(int)_channels.GetValue(2) - 172) / (1815 - 165)) * (1 - -1) + -1),
                 //((((double)(int)_channels.GetValue(1) - 172) / (1825 - 165)) * (1 - -1) + -1));
 
-                //ArcadeDrive(((((double)(int)_channels.GetValue(2) - 172) / (1815 - 165)) * (1 - -1) + -1),
-                //0);
+                
+                if(stop)
+                {
+                    leftLeader.Set(ControlMode.PercentOutput, 0);
+                    leftFollower1.Set(ControlMode.PercentOutput, 0);
+                    leftFollower2.Set(ControlMode.PercentOutput, 0);
 
-                //TankDrive(((((double)(int)_channels.GetValue(3) - 172) / (1788 - 172)) * (1 - -1) + -1),
-                //((((double)(int)_channels.GetValue(1) - 172) / (1811 - 172)) * (1 - -1) + -1));
+                    rightLeader.Set(ControlMode.PercentOutput, 0);
+                    rightFollower1.Set(ControlMode.PercentOutput, 0);
+                    rightFollower2.Set(ControlMode.PercentOutput, 0);
+
+                    leftMotor.Set(ControlMode.PercentOutput, 0);
+                    rightMotor.Set(ControlMode.PercentOutput, 0);
+
+                    currentLeft = 0;
+                    currentRight = 0;
+                } else
+                {
+                    TankDrive(((((double)(int)_channels.GetValue(3) - 165) / (1820 - 165)) * (1 - -1) + -1),
+                    ((((double)(int)_channels.GetValue(1) - 165) / (1820 - 165)) * (1 - -1) + -1));
+                }
+
+                //Test();
 
                 // Based on what the swtich on the drone controller is, the method will run the fake wheels forwards, backwards, or stop them
                 //RunFakeWheels();
